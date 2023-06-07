@@ -26,6 +26,30 @@
 Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the firmware.  
 
 Check out the project [wiki](https://github.com/justcallmekoko/ESP32Marauder/wiki) for a full overview of the ESP32 Marauder
+## Uploading the firmware
+You can build yourself the code with the Arduino IDE or use a prebuilt release. To upload the prebuilt binaries you have 2 options:
+
+#### Use EspTool
+
+Make sure you have the esptool library installed on your system and write the following command in a terminal:
+```
+esptool.exe --chip esp32 --port COM3 --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 8MB 0x1000 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app.bin 0x10000 firmware.bin 
+```
+> :warning: Change the serial port or files path if needed 
+
+#### Use EspWebTool:
+* Download the latest [release](https://github.com/uamseif/ESP32Marauder/releases)
+* Go to [esp.huhn.me](https://esp.huhn.me/)
+* Plug your device and turn it on, press the connect button on the espwebtool, select your serial port and upload the bin files with its corresponding offset:
+
+| File           | Offset  |
+|----------------|---------|
+| bootloader.bin | 0x1000  |
+| partitions.bin | 0x8000  |
+| boot_app.bin   | 0xE000  |
+| firmware.bin   | 0x10000 |
+
+* Press the PROGRAM button and wait for the proccess to end
 
 # For Sale Now
 You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
