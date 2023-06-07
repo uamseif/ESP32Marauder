@@ -34,9 +34,9 @@ class SDInterface {
     bool do_save = true;
 
     String card_sz;
-  
+#ifdef HAS_SD
     bool initSD();
-
+#endif
     void addPacket(uint8_t* buf, uint32_t len);
     void openCapture(String file_name = "");
     void runUpdate();

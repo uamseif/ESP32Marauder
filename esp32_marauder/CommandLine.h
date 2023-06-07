@@ -10,7 +10,9 @@
 
 #include "WiFiScan.h"
 #include "Web.h"
+#ifdef HAS_SD
 #include "SDInterface.h"
+#endif
 #include "settings.h"
 
 #ifdef HAS_SCREEN
@@ -20,8 +22,10 @@
 
 extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
-extern SDInterface sd_obj;
-extern Settings settings_obj;
+#ifdef HAS_SD
+  extern SDInterface sd_obj;
+  extern Settings settings_obj;
+#endif
 extern LinkedList<AccessPoint>* access_points;
 extern LinkedList<ssid>* ssids;
 extern LinkedList<Station>* stations;

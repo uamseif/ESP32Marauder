@@ -211,38 +211,47 @@ void CommandLine::runCommand(String input) {
     int re_sw = this->argSearch(&cmd_args, "-r"); // Reset setting
     int en_sw = this->argSearch(&cmd_args, "enable"); // enable setting
     int da_sw = this->argSearch(&cmd_args, "disable"); // disable setting
-
-    if (re_sw != -1) {
-      settings_obj.createDefaultSettings(SPIFFS);
-      return;
-    }
-
-    if (ss_sw == -1) {
-      settings_obj.printJsonSettings(settings_obj.getSettingsString());
-    }
-    else {
-      bool result = false;
-      String setting_name = cmd_args.get(ss_sw + 1);
-      if (en_sw != -1)
-        result = settings_obj.saveSetting<bool>(setting_name, true);
-      else if (da_sw != -1)
-        result = settings_obj.saveSetting<bool>(setting_name, false);
-      else {
-        Serial.println("You did not properly enable/disable this setting.");
+    #ifdef HAS_SD
+      if (re_sw != -1) {
+        settings_obj.createDefaultSettings(SPIFFS);
         return;
       }
+
+      if (ss_sw == -1) {
+          settings_obj.printJsonSettings(settings_obj.getSettingsString());
+      }
+      else {
+        bool result = false;
+        String setting_name = cmd_args.get(ss_sw + 1);
+        if (en_sw != -1)
+          result = settings_obj.saveSetting<bool>(setting_name, true);
+        else if (da_sw != -1)
+          result = settings_obj.saveSetting<bool>(setting_name, false);
+        else {
+          Serial.println("You did not properly enable/disable this setting.");
+          return;
+        }
+
 
       if (!result) {
         Serial.println("Could not successfully update setting \"" + setting_name + "\"");
         return;
       }
-    }
-  }
 
+    }
+    #endif
+  }
+#ifdef HAS_SD
   else if (cmd_args.get(0) == REBOOT_CMD) {
     Serial.println("Rebooting...");
     ESP.restart();
   }
+    #else
+if (cmd_args.get(0) == REBOOT_CMD) {
+Serial.println("Rebooting...");
+ESP.restart();
+}
+#endif
 
   //// WiFi/Bluetooth Scan/Attack commands
   if (!wifi_scan_obj.scanning()) {
@@ -518,15 +527,17 @@ void CommandLine::runCommand(String input) {
         //#endif
         web_obj.setupOTAupdate();
       }
-      // Update via SD
-      else if (sd_sw != -1) {
-        if (!sd_obj.supported) {
-          Serial.println("SD card is not connected. Cannot perform SD Update");
-          return;
+      #ifdef HAS_SD
+        // Update via SD
+        else if (sd_sw != -1) {
+          if (!sd_obj.supported) {
+            Serial.println("SD card is not connected. Cannot perform SD Update");
+            return;
+          }
+          wifi_scan_obj.currentScanMode = OTA_UPDATE;
+          sd_obj.runUpdate();
         }
-        wifi_scan_obj.currentScanMode = OTA_UPDATE;
-        sd_obj.runUpdate();
-      }
+      #endif
     }
   }
 

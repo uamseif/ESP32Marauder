@@ -5,13 +5,14 @@ void flipperLED::RunSetup() {
   pinMode(G_PIN, OUTPUT);
   pinMode(R_PIN, OUTPUT);
 
+#ifdef HAS_SD
   if (!settings_obj.loadSetting<bool>("EnableLED")) {
     digitalWrite(B_PIN, HIGH);
     digitalWrite(G_PIN, HIGH);
     digitalWrite(R_PIN, HIGH);
     return;
   }
-    
+#endif
   delay(50);
 
   digitalWrite(B_PIN, LOW);
@@ -26,9 +27,10 @@ void flipperLED::RunSetup() {
 }
 
 void flipperLED::attackLED() {
+#ifdef HAS_SD
   if (!settings_obj.loadSetting<bool>("EnableLED"))
     return;
-    
+#endif
   digitalWrite(B_PIN, HIGH);
   digitalWrite(G_PIN, HIGH);
   digitalWrite(R_PIN, HIGH); 
@@ -37,9 +39,10 @@ void flipperLED::attackLED() {
 }
 
 void flipperLED::sniffLED() {
+#ifdef HAS_SD
   if (!settings_obj.loadSetting<bool>("EnableLED"))
     return;
-    
+#endif
   digitalWrite(B_PIN, HIGH);
   digitalWrite(G_PIN, HIGH);
   digitalWrite(R_PIN, HIGH);
@@ -48,9 +51,10 @@ void flipperLED::sniffLED() {
 }
 
 void flipperLED::offLED() {
+#ifdef HAS_SD
   if (!settings_obj.loadSetting<bool>("EnableLED"))
     return;
-    
+#endif
   digitalWrite(B_PIN, HIGH);
   digitalWrite(G_PIN, HIGH);
   digitalWrite(R_PIN, HIGH);

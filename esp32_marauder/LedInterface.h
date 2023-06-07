@@ -4,7 +4,9 @@
 #include "configs.h"
 #include "settings.h"
 #include <Arduino.h>
-#include <Adafruit_NeoPixel.h>
+#ifndef MARAUDER_C1B3RT4CKS
+    #include <Adafruit_NeoPixel.h>
+#endif
 
 #define Pixels 1
 
@@ -13,9 +15,13 @@
 #define MODE_ATTACK 2
 #define MODE_SNIFF 3
 
-extern Settings settings_obj;
-extern Adafruit_NeoPixel strip;
+#ifdef HAS_SD
+  extern Settings settings_obj;
+#endif
+#ifndef MARAUDER_C1B3RT4CKS
 
+extern Adafruit_NeoPixel strip;
+#endif
 class LedInterface {
 
   private:

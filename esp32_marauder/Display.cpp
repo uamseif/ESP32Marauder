@@ -20,11 +20,16 @@ void Display::RunSetup()
   #endif
   
   tft.init();
+
+#ifdef MARAUDER_C1B3RT4CKS
+  tft.setRotation(2); // Portrait
+#else
   tft.setRotation(0); // Portrait
+#endif
 
   tft.setCursor(0, 0);
 
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
 
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
@@ -32,8 +37,9 @@ void Display::RunSetup()
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
       //Serial.println(F("Using TFT DIY"));
-    #endif
-    tft.setTouch(calData);
+
+    //tft.setTouch(calData);
+#endif
 
   #endif
 
@@ -381,6 +387,7 @@ void Display::setupScrollArea(uint16_t tfa, uint16_t bfa) {
   //Serial.println("   bfa: " + (String)bfa);
   //Serial.println("yStart: " + (String)this->yStart);
   #ifndef MARAUDER_MINI
+  #ifndef MARAUDER_C1B3RT4CKS
     tft.writecommand(ILI9341_VSCRDEF); // Vertical scroll definition
     tft.writedata(tfa >> 8);           // Top Fixed Area line count
     tft.writedata(tfa);
@@ -389,15 +396,18 @@ void Display::setupScrollArea(uint16_t tfa, uint16_t bfa) {
     tft.writedata(bfa >> 8);           // Bottom Fixed Area line count
     tft.writedata(bfa);
   #endif
+  #endif
 }
 
 
 void Display::scrollAddress(uint16_t vsp) {
   #ifndef MARAUDER_MINI
+#ifndef  MARAUDER_C1B3RT4CKS
     tft.writecommand(ILI9341_VSCRSADD); // Vertical scrolling pointer
     tft.writedata(vsp>>8);
     tft.writedata(vsp);
-  #endif
+#endif
+#endif
 }
 
 
@@ -446,6 +456,8 @@ uint16_t ylast;
 uint32_t AH;
 void Display::drawStylus()
 {
+#ifdef HAS_TOUCH
+
   uint16_t x = 0, y = 0; // To store the touch coordinates
 
   // Pressed will be set true is there is a valid touch on the screen
@@ -507,6 +519,7 @@ void Display::drawStylus()
     xlast = 0;
     ylast = 0;
   }
+#endif
 }
 
 //====================================================================================

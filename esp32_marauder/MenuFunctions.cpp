@@ -48,13 +48,16 @@ MenuFunctions::MenuFunctions()
     extern Display display_obj;
     
     uint16_t touchX, touchY;
-  
+#ifdef HAS_TOUCH
     bool touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
   
     if(!touched)
     {
       return false;
     }
+#else
+    bool touched = false;
+#endif
   
     if(touchX>WIDTH_1 || touchY > HEIGHT_1)
     {
@@ -131,29 +134,30 @@ MenuFunctions::MenuFunctions()
     lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
     lv_textarea_set_text(ta1, "");
     lv_textarea_set_placeholder_text(ta1, "Ducky script");
-  
-    if (sd_obj.supported) {
-      // Create load button
-      lv_obj_t * label;
-      lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(load_btn, load_btn_cb);
-      lv_obj_set_height(load_btn, 35);
-      lv_obj_set_width(load_btn, LV_HOR_RES / 3);
-      lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
-      label = lv_label_create(load_btn, NULL);
-      lv_label_set_text(label, text05);
-    
-      // Create Save As button
-      lv_obj_t * label2;
-      lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(save_as_btn, load_btn_cb);
-      lv_obj_set_height(save_as_btn, 35);
-      lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
-      lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
-      label2 = lv_label_create(save_as_btn, NULL);
-      lv_label_set_text(label2, text06);
-    }
-    
+
+    #ifdef HAS_SD
+      if (sd_obj.supported) {
+        // Create load button
+        lv_obj_t * label;
+        lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
+        lv_obj_set_event_cb(load_btn, load_btn_cb);
+        lv_obj_set_height(load_btn, 35);
+        lv_obj_set_width(load_btn, LV_HOR_RES / 3);
+        lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+        label = lv_label_create(load_btn, NULL);
+        lv_label_set_text(label, text05);
+
+        // Create Save As button
+        lv_obj_t * label2;
+        lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
+        lv_obj_set_event_cb(save_as_btn, load_btn_cb);
+        lv_obj_set_height(save_as_btn, 35);
+        lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
+        lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
+        label2 = lv_label_create(save_as_btn, NULL);
+        lv_label_set_text(label2, text06);
+      }
+    #endif
     // Focus it on one of the text areas to start
     lv_keyboard_set_textarea(kb, ta1);
     lv_keyboard_set_cursor_manage(kb, true);
@@ -170,7 +174,9 @@ MenuFunctions::MenuFunctions()
   }
   
   void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
-    extern Settings settings_obj;
+    #ifdef HAS_SD
+      extern Settings settings_obj;
+    #endif
     extern MenuFunctions menu_function_obj;
   
     String btn_text = lv_list_get_btn_text(btn);
@@ -205,24 +211,30 @@ MenuFunctions::MenuFunctions()
         //lv_obj_center(label);
   
         label = lv_label_create(exit_btn, NULL);
-  
-        // Create the type specific device
-        if (settings_obj.getSettingType(btn_text) == "bool") {
-          lv_obj_t * sw = lv_switch_create(obj, NULL);
-          lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
-        }
+
+        #ifdef HAS_SD
+          // Create the type specific device
+          if (settings_obj.getSettingType(btn_text) == "bool") {
+            lv_obj_t * sw = lv_switch_create(obj, NULL);
+            lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
+          }
+        #endif
       }
     }
   }
   
   void MenuFunctions::displaySettingsGFX(){
-    extern Settings settings_obj;
+    #ifdef HAS_SD
+      extern Settings settings_obj;
+    #endif
   
     DynamicJsonDocument json(1024); // ArduinoJson v6
-  
-    if (deserializeJson(json, settings_obj.getSettingsString())) {
-      Serial.println("\nCould not parse json");
-    }
+
+    #ifdef HAS_SD
+      if (deserializeJson(json, settings_obj.getSettingsString())) {
+        Serial.println("\nCould not parse json");
+      }
+    #endif
     
     lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
     lv_obj_set_size(list1, 160, 200);
@@ -628,7 +640,9 @@ MenuFunctions::MenuFunctions()
   }
   
   void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
-    extern SDInterface sd_obj;
+    #ifdef HAS_SD
+      extern SDInterface sd_obj;
+    #endif
     extern MenuFunctions menu_function_obj;
   
     String btn_text = lv_list_get_btn_text(load_btn);
@@ -859,9 +873,11 @@ void MenuFunctions::main(uint32_t currentTime)
       wifi_scan_obj.orient_display = false;
     }
     #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
       if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
           (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
         display_obj.updateBanner(current_menu->name);
+#endif
     #endif
   }
 
@@ -871,7 +887,7 @@ void MenuFunctions::main(uint32_t currentTime)
       if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
           (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
         this->updateStatusBar();
-        #ifdef MARAUDER_MINI
+        #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
           display_obj.updateBanner(current_menu->name);
         #endif
     }
@@ -900,12 +916,15 @@ void MenuFunctions::main(uint32_t currentTime)
 
   // getTouch causes a 10ms delay which makes beacon spam less effective
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     pressed = display_obj.tft.getTouch(&t_x, &t_y);
+#endif
   #endif
 
 
   // This is if there are scans/attacks going on
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
         (pressed) &&
         (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
@@ -949,9 +968,10 @@ void MenuFunctions::main(uint32_t currentTime)
   
       return;
     }
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
 
     bool c_btn_press = c_btn.justPressed();
     
@@ -1008,6 +1028,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AP_SPAM) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
@@ -1065,9 +1086,10 @@ void MenuFunctions::main(uint32_t currentTime)
     }
     x = -1;
     y = -1;
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     if (u_btn.justPressed()){
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
           (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
@@ -1211,7 +1233,7 @@ void MenuFunctions::updateStatusBar()
 {
   display_obj.tft.setTextSize(1);
   
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.setFreeFont(NULL);
   #endif
   
@@ -1234,10 +1256,12 @@ void MenuFunctions::updateStatusBar()
     temp_obj.old_temp = temp_obj.current_temp;
     display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
     #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+#endif
     #endif
 
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString((String)temp_obj.current_temp + " C", 0, 0, 1);
     #endif
   }
@@ -1248,10 +1272,12 @@ void MenuFunctions::updateStatusBar()
     wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
     display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
     #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+#endif
     #endif
 
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, TFT_WIDTH/4, 0, 1);
     #endif
   }
@@ -1262,10 +1288,12 @@ void MenuFunctions::updateStatusBar()
     wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
     display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
     #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+#endif
     #endif
 
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
       display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", TFT_WIDTH/1.75, 0, 1);
     #endif
   }
@@ -1274,12 +1302,16 @@ void MenuFunctions::updateStatusBar()
   MenuFunctions::battery(false);
 
   // Draw SD info
+  the_color = TFT_RED;
+  #ifdef HAS_SD
   if (sd_obj.supported)
     the_color = TFT_GREEN;
   else
     the_color = TFT_RED;
+  #endif
 
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     display_obj.tft.drawXBitmap(170,
                                 0,
                                 menu_icons[STATUS_SD],
@@ -1287,9 +1319,10 @@ void MenuFunctions::updateStatusBar()
                                 16,
                                 STATUSBAR_COLOR,
                                 the_color);
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
     display_obj.tft.drawString("SD", TFT_WIDTH - 12, 0, 1);
   #endif
@@ -1298,7 +1331,7 @@ void MenuFunctions::updateStatusBar()
 void MenuFunctions::drawStatusBar()
 {
   display_obj.tft.setTextSize(1);
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.setFreeFont(NULL);
   #endif
   display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
@@ -1324,10 +1357,12 @@ void MenuFunctions::drawStatusBar()
   temp_obj.old_temp = temp_obj.current_temp;
   display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString((String)temp_obj.current_temp + " C", 0, 0, 1);
   #endif
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
@@ -1337,10 +1372,12 @@ void MenuFunctions::drawStatusBar()
   wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
   display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, TFT_WIDTH/4, 0, 1);
   #endif
 
@@ -1349,23 +1386,28 @@ void MenuFunctions::drawStatusBar()
   wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
   display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", TFT_WIDTH/1.75, 0, 1);
   #endif
 
 
   MenuFunctions::battery2(true);
-
+  the_color = TFT_GREEN;
+  #ifdef HAS_SD
   // Draw SD info
   if (sd_obj.supported)
     the_color = TFT_GREEN;
   else
     the_color = TFT_RED;
+  #endif
 
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     display_obj.tft.drawXBitmap(170,
                                 0,
                                 menu_icons[STATUS_SD],
@@ -1373,9 +1415,10 @@ void MenuFunctions::drawStatusBar()
                                 16,
                                 STATUSBAR_COLOR,
                                 the_color);
+#endif
   #endif
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
     display_obj.tft.drawString("SD", TFT_WIDTH - 12, 0, 1);
   #endif
@@ -1390,15 +1433,18 @@ void MenuFunctions::orientDisplay()
   display_obj.tft.setCursor(0, 0);
 
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
       //Serial.println("Using TFT Shield");
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
       //Serial.println("Using TFT DIY");
-    #endif
 
-    display_obj.tft.setTouch(calData);
+
+    //display_obj.tft.setTouch(calData);
+    #endif
+#endif
   #endif
 
   changeMenu(current_menu);
@@ -1411,20 +1457,26 @@ void MenuFunctions::runBoolSetting(String key) {
 }
 
 String MenuFunctions::callSetting(String key) {
-  specSettingMenu.name = key;
-  
-  String setting_type = settings_obj.getSettingType(key);
+  #ifdef HAS_SD
+    specSettingMenu.name = key;
 
-  if (setting_type == "bool") {
+    String setting_type = settings_obj.getSettingType(key);
+
+    if (setting_type == "bool") {
+      return "bool";
+    }
+  #else
     return "bool";
-  }
+  #endif
 }
 
 void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
   specSettingMenu.name = key;
-
+#ifdef HAS_SD
   bool setting_value = settings_obj.loadSetting<bool>(key);
-
+#else
+  bool setting_value = false;
+#endif
   // Make a local copy of menu node
   MenuNode node = menu->list->get(index);
 
@@ -1457,7 +1509,9 @@ void MenuFunctions::RunSetup()
   extern LinkedList<AccessPoint>* access_points;
   
   #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
     this->initLVGL();
+#endif
   #endif
    
   // root menu stuff
@@ -1585,7 +1639,7 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
   });
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
       wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
     });
@@ -1681,7 +1735,7 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiGeneralMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(wifiGeneralMenu.parentMenu);
   });
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI  && !defined MARAUDER_C1B3RT4CKS
     addNodes(&wifiGeneralMenu, text_table1[55], TFT_DARKCYAN, NULL, JOIN_WIFI, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
@@ -1697,7 +1751,7 @@ void MenuFunctions::RunSetup()
     changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI  && !defined MARAUDER_C1B3RT4CKS
     addNodes(&wifiGeneralMenu, text_table1[1], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
       //wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
@@ -1717,7 +1771,7 @@ void MenuFunctions::RunSetup()
     changeMenu(&clearAPsMenu);
     wifi_scan_obj.RunClearStations();
   });
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     // Select APs on OG
     addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
@@ -1858,7 +1912,7 @@ void MenuFunctions::RunSetup()
   addNodes(&badusbMenu, text_table1[36], TFT_PURPLE, NULL, TEST_BAD_USB_ICO, [this]() {
     a32u4_obj.test();
   });
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     addNodes(&badusbMenu, text_table1[37], TFT_RED, NULL, BAD_USB_ICO, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
@@ -1916,15 +1970,17 @@ void MenuFunctions::RunSetup()
   addNodes(&settingsMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(settingsMenu.parentMenu);
   });
+  #ifdef HAS_SD
   for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
     if (this->callSetting(settings_obj.setting_index_to_name(i)) == "bool")
       addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFT_LIGHTGREY, NULL, 0, [this, i]() {
       settings_obj.toggleSetting(settings_obj.setting_index_to_name(i));
       changeMenu(&specSettingMenu);
       //this->callSetting(settings_obj.setting_index_to_name(i));
-      this->displaySetting(settings_obj.setting_index_to_name(i), &settingsMenu, i + 1);
+      //this->displaySetting(settings_obj.setting_index_to_name(i), &settingsMenu, i + 1);
     }, settings_obj.loadSetting<bool>(settings_obj.setting_index_to_name(i)));
   }
+  #endif
 
   // Specific setting menu
   specSettingMenu.parentMenu = &settingsMenu;
@@ -1943,10 +1999,12 @@ void MenuFunctions::RunSetup()
     changeMenu(&updateMenu);
     web_obj.setupOTAupdate();
   });
+  #ifdef HAS_SD
   if (sd_obj.supported) addNodes(&whichUpdateMenu, text_table1[40], TFT_MAGENTA, NULL, SD_UPDATE, [this]() {
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&confirmMenu);
   });
+  #endif
   addNodes(&whichUpdateMenu, text_table1[41], TFT_RED, NULL, ESP_UPDATE_ICO, [this]() {
     wifi_scan_obj.currentScanMode = ESP_UPDATE;
     changeMenu(&espUpdateMenu);
@@ -1970,7 +2028,9 @@ void MenuFunctions::RunSetup()
   addNodes(&confirmMenu, text14, TFT_ORANGE, NULL, UPDATE, [this]() {
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&failedUpdateMenu);
+    #ifdef HAS_SD
     sd_obj.runUpdate();
+    #endif
   });
 
   // Web Update
@@ -2083,17 +2143,17 @@ void MenuFunctions::displayCurrentMenu()
 
   if (current_menu->list != NULL)
   {
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.setFreeFont(MENU_FONT);
     #endif
 
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
       display_obj.tft.setFreeFont(NULL);
       display_obj.tft.setTextSize(1);
     #endif
     for (uint8_t i = 0; i < current_menu->list->size(); i++)
     {
-      #ifndef MARAUDER_MINI
+      #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
         if (!current_menu->list->get(i).selected)
           display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
         else
@@ -2110,7 +2170,7 @@ void MenuFunctions::displayCurrentMenu()
 
       #endif
 
-      #ifdef MARAUDER_MINI
+      #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
         if ((current_menu->selected == i) || (current_menu->list->get(i).selected))
           display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
         else 

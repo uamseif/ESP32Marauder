@@ -10,13 +10,15 @@
 #include "WiFiScan.h"
 #include "Display.h"
 #include "BatteryInterface.h"
-#include "SDInterface.h"
+#ifdef HAS_SD
+  #include "SDInterface.h"
+#endif
 #include "Web.h"
 #include "esp_interface.h"
 #include "a32u4_interface.h"
 #include "settings.h"
 
-#ifdef MARAUDER_MINI
+#if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
   #include <SwitchLib.h>
   extern SwitchLib u_btn;
   extern SwitchLib d_btn;
@@ -28,12 +30,15 @@
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
+#ifdef HAS_SD
 extern SDInterface sd_obj;
+#endif
 extern BatteryInterface battery_obj;
 extern EspInterface esp_obj;
 extern A32u4Interface a32u4_obj;
+#ifdef HAS_SD
 extern Settings settings_obj;
-
+#endif
 #define FLASH_BUTTON 0
 
 #if BATTERY_ANALOG_ON == 1

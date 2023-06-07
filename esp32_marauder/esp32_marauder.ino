@@ -24,7 +24,9 @@ https://www.online-utility.org/image/convert/to/XBM
 
 #include "Assets.h"
 #include "WiFiScan.h"
-#include "SDInterface.h"
+#ifdef HAS_SD
+  #include "SDInterface.h"
+#endif
 #include "Web.h"
 #include "Buffer.h"
 #include "BatteryInterface.h"
@@ -42,7 +44,7 @@ https://www.online-utility.org/image/convert/to/XBM
   #include "a32u4_interface.h"
 #endif
 
-#ifdef MARAUDER_MINI
+#if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
   #include <SwitchLib.h>
   SwitchLib u_btn = SwitchLib(U_BTN, 1000, true);
   SwitchLib d_btn = SwitchLib(D_BTN, 1000, true);
@@ -52,14 +54,18 @@ https://www.online-utility.org/image/convert/to/XBM
 #endif
 
 WiFiScan wifi_scan_obj;
-SDInterface sd_obj;
+#ifdef HAS_SD
+  SDInterface sd_obj;
+#endif
 Web web_obj;
 Buffer buffer_obj;
 BatteryInterface battery_obj;
 TemperatureInterface temp_obj;
 LedInterface led_obj;
 EspInterface esp_obj;
-Settings settings_obj;
+#ifdef HAS_SD
+  Settings settings_obj;
+#endif
 CommandLine cli_obj;
 flipperLED flipper_led;
 
@@ -71,31 +77,41 @@ flipperLED flipper_led;
 
 const String PROGMEM version_number = MARAUDER_VERSION;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
+#ifndef MARAUDER_C1B3RT4CKS
 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
+#endif
 uint32_t currentTime  = 0;
 
 
 void backlightOn() {
   #ifdef HAS_SCREEN
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI
+    #ifndef MARAUDER_C1B3RT4CKS
       digitalWrite(TFT_BL, LOW);
+    #endif
     #endif
   
     #ifndef MARAUDER_MINI
+    #ifndef MARAUDER_C1B3RT4CKS
       digitalWrite(TFT_BL, HIGH);
+    #endif
     #endif
   #endif
 }
 
 void backlightOff() {
   #ifdef HAS_SCREEN
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
+  #ifndef MARAUDER_C1B3RT4CKS
       digitalWrite(TFT_BL, HIGH);
+  #endif
     #endif
   
     #ifndef MARAUDER_MINI
+#ifndef MARAUDER_C1B3RT4CKS
       digitalWrite(TFT_BL, LOW);
+#endif
     #endif
   #endif
 }
@@ -106,7 +122,9 @@ void setup()
   pinMode(FLASH_BUTTON, INPUT);
 
   #ifdef HAS_SCREEN
+#ifndef MARAUDER_C1B3RT4CKS
     pinMode(TFT_BL, OUTPUT);
+#endif
   #endif
   
   backlightOff();
@@ -120,11 +138,15 @@ void setup()
     digitalWrite(TFT_CS, HIGH);
   #endif
 
+  #ifdef HAS_SD
   pinMode(SD_CS, OUTPUT);
+  #endif
 
-  delay(10);
-  
-  digitalWrite(SD_CS, HIGH);
+
+  #ifdef HAS_SD
+    delay(10);
+    digitalWrite(SD_CS, HIGH);
+  #endif
 
   delay(10);
 
@@ -156,11 +178,11 @@ void setup()
 
   #ifdef HAS_SCREEN
     //showCenterText(version_number, 250);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
     #endif
   
-    #ifdef MARAUDER_MINI
+    #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
       display_obj.tft.drawCentreString(display_obj.version_number, TFT_WIDTH/2, TFT_HEIGHT, 1);
     #endif
   #endif
@@ -184,8 +206,9 @@ void setup()
   #endif
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
-
-  settings_obj.begin();
+  #ifdef HAS_SD
+    settings_obj.begin();
+  #endif
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.RunSetup();
@@ -206,20 +229,22 @@ void setup()
   #endif
 
   // Do some SD stuff
-  if(sd_obj.initSD()) {
-    //Serial.println(F("SD Card supported"));
-    #ifdef HAS_SCREEN
-      display_obj.tft.println(F(text_table0[3]));
-    #endif
-  }
-  else {
-    Serial.println(F("SD Card NOT Supported"));
-    #ifdef HAS_SCREEN
-      display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-      display_obj.tft.println(F(text_table0[4]));
-      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    #endif
-  }
+  #ifdef HAS_SD
+    if(sd_obj.initSD()) {
+      //Serial.println(F("SD Card supported"));
+      #ifdef HAS_SCREEN
+        display_obj.tft.println(F(text_table0[3]));
+      #endif
+    }
+    else {
+      Serial.println(F("SD Card NOT Supported"));
+      #ifdef HAS_SCREEN
+        display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+        display_obj.tft.println(F(text_table0[4]));
+        display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+      #endif
+    }
+  #endif
 
   battery_obj.RunSetup();
 
@@ -285,7 +310,7 @@ void loop()
   currentTime = millis();
   bool mini = false;
 
-  #ifdef MARAUDER_MINI
+  #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
     mini = true;
   #endif
 
@@ -303,12 +328,16 @@ void loop()
       display_obj.main(wifi_scan_obj.currentScanMode);
     #endif
     wifi_scan_obj.main(currentTime);
-    sd_obj.main();
+    #ifdef HAS_SD
+      sd_obj.main();
+    #endif
     #ifndef MARAUDER_FLIPPER
       battery_obj.main(currentTime);
       temp_obj.main(currentTime);
     #endif
-    settings_obj.main(currentTime);
+    #ifdef HAS_SD
+      settings_obj.main(currentTime);
+    #endif
     if (((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) && (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) ||
         (mini)) {
       #ifdef HAS_SCREEN

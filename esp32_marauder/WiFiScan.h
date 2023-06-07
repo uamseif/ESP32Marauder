@@ -24,7 +24,9 @@
 #ifdef HAS_SCREEN
   #include "Display.h"
 #endif
+#ifdef HAS_SD
 #include "SDInterface.h"
+#endif
 #include "Buffer.h"
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"
@@ -75,11 +77,15 @@
 #ifdef HAS_SCREEN
   extern Display display_obj;
 #endif
+#ifdef HAS_SD
 extern SDInterface sd_obj;
+#endif
 extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
+#ifdef HAS_SD
 extern Settings settings_obj;
+#endif
 extern flipperLED flipper_led;
 extern LedInterface led_obj;
 

@@ -1,6 +1,6 @@
 #include "SDInterface.h"
 #include "lang_var.h"
-
+#ifdef HAS_SD
 bool SDInterface::initSD() {
   String display_string = "";
 
@@ -68,7 +68,7 @@ bool SDInterface::initSD() {
     return true;
   }
 }
-
+#endif
 void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
   if ((this->supported) && (this->do_save)) {
     buffer_obj.addPacket(buf, len);
@@ -223,7 +223,9 @@ void SDInterface::main() {
   else if (!this->supported) {
     if (checkDetectPin()) {
       delay(100);
-      this->initSD();
+      #ifdef HAS_SD
+        this->initSD();
+      #endif
     }
   }
 }

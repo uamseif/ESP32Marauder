@@ -266,10 +266,11 @@ void WiFiScan::initWiFi(uint8_t scan_mode) {
   if (scan_mode != WIFI_SCAN_OFF) {
     //Serial.println(F("Initializing WiFi settings..."));
     this->changeChannel();
-  
+#ifdef HAS_SD
     this->force_pmkid = settings_obj.loadSetting<bool>(text_table4[5]);
     this->force_probe = settings_obj.loadSetting<bool>(text_table4[6]);
     this->save_pcap = settings_obj.loadSetting<bool>(text_table4[7]);
+#endif
     //Serial.println(F("Initialization complete"));
   }
 }
@@ -364,9 +365,11 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
-    display_obj.tft.fillRect(0,16,240,16, color);
-    display_obj.tft.drawCentreString((String)title_string,120,16,2);
-    display_obj.touchToExit();
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
+      display_obj.tft.fillRect(0,16,240,16, color);
+      display_obj.tft.drawCentreString((String)title_string,120,16,2);
+      display_obj.touchToExit();
+    #endif
     display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   #endif
   packets_sent = 0;
@@ -553,8 +556,9 @@ String WiFiScan::freeRAM()
 // Function to start running a beacon scan
 void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("ap");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -570,7 +574,7 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[44],120,16,2);
       display_obj.touchToExit();
@@ -605,8 +609,9 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
       Serial.println("Using TFT DIY");
-    #endif
-    display_obj.tft.setTouch(calData);
+
+    //display_obj.tft.setTouch(calData);
+#endif
     
   
     lv_obj_t * scr = lv_cont_create(NULL, NULL);
@@ -773,7 +778,7 @@ void WiFiScan::RunInfo()
     display_obj.tft.println(text_table4[26] + ap_mac);
     display_obj.tft.println(text_table4[27] + free_ram);
   #endif
-
+#ifdef HAS_SD
   if (sd_obj.supported) {
     #ifdef HAS_SCREEN
       display_obj.tft.println(text_table4[28]);
@@ -782,13 +787,14 @@ void WiFiScan::RunInfo()
       display_obj.tft.println("MB");
     #endif
   }
+
   else {
     #ifdef HAS_SCREEN
       display_obj.tft.println(text_table4[30]);
       display_obj.tft.println(text_table4[31]);
     #endif
-  }  
-
+  }
+#endif
   battery_obj.battery_level = battery_obj.getBatteryLevel();
   if (battery_obj.i2c_supported) {
     #ifdef HAS_SCREEN
@@ -808,8 +814,9 @@ void WiFiScan::RunInfo()
 }
 
 void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
+#ifdef HAS_SD
   sd_obj.openCapture("espressif");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -824,7 +831,7 @@ void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[36],120,16,2);
       display_obj.touchToExit();
@@ -852,10 +859,10 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   #else
     led_obj.setMode(MODE_SNIFF);
   #endif
-
+#ifdef HAS_SD
   sd_obj.openCapture("packet_monitor");
-
-  #ifndef MARAUDER_MINI
+#endif
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     
     #ifdef HAS_SCREEN
       display_obj.tft.init();
@@ -870,9 +877,10 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
       #else if defined(TFT_DIY)
         uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
         Serial.println("Using TFT DIY");
-      #endif
-      display_obj.tft.setTouch(calData);
-    
+
+      //display_obj.tft.setTouch(calData);
+#endif
+
       //display_obj.tft.setFreeFont(1);
       display_obj.tft.setFreeFont(NULL);
       display_obj.tft.setTextSize(1);
@@ -897,7 +905,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
       display_obj.initScrollValues(true);
       display_obj.tft.setTextWrap(false);
       display_obj.tft.setTextColor(TFT_WHITE, color);
-      #ifndef MARAUDER_MINI
+      #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
         display_obj.tft.fillRect(0,16,240,16, color);
         display_obj.tft.drawCentreString(text_table4[38],120,16,2);
         display_obj.touchToExit();
@@ -930,15 +938,15 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   
   num_eapol = 0;
 
-  #ifndef MARAUDER_MINI
+  #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     #ifdef HAS_SCREEN
       display_obj.tft.init();
       display_obj.tft.setRotation(1);
       display_obj.tft.fillScreen(TFT_BLACK);
     #endif
-  
+#ifdef HAS_SD
     sd_obj.openCapture("eapol");
-  
+#endif
     #ifdef HAS_SCREEN
       #ifdef TFT_SHIELD
         uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
@@ -946,8 +954,9 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
       #else if defined(TFT_DIY)
         uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
         //Serial.println("Using TFT DIY");
-      #endif
-      display_obj.tft.setTouch(calData);
+
+      //display_obj.tft.setTouch(calData);
+#endif
     
       display_obj.tft.setFreeFont(NULL);
       display_obj.tft.setTextSize(1);
@@ -962,8 +971,9 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
       display_obj.tftDrawExitScaleButtons();
     #endif
   #else
+  #ifdef HAS_SD
     sd_obj.openCapture("eapol");
-    
+  #endif
     #ifdef HAS_SCREEN
       display_obj.TOP_FIXED_AREA_2 = 48;
       display_obj.tteBar = true;
@@ -972,7 +982,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
       display_obj.initScrollValues(true);
       display_obj.tft.setTextWrap(false);
       display_obj.tft.setTextColor(TFT_WHITE, color);
-      #ifndef MARAUDER_MINI
+      #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
         display_obj.tft.fillRect(0,16,240,16, color);
         display_obj.tft.drawCentreString(text_table4[38],120,16,2);
         display_obj.touchToExit();
@@ -1033,7 +1043,7 @@ void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(" Mimic Flood ",120,16,2);
       display_obj.touchToExit();
@@ -1055,8 +1065,9 @@ void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
 
 void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("pwnagotchi");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1071,7 +1082,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[37],120,16,2);
       display_obj.touchToExit();
@@ -1095,8 +1106,9 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("beacon");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1111,7 +1123,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[38],120,16,2);
       display_obj.touchToExit();
@@ -1134,8 +1146,9 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunStationScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("station");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1150,7 +1163,7 @@ void WiFiScan::RunStationScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table1[59],120,16,2);
       display_obj.touchToExit();
@@ -1173,8 +1186,9 @@ void WiFiScan::RunStationScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunRawScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("raw");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1189,7 +1203,7 @@ void WiFiScan::RunRawScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_WHITE, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table1[58],120,16,2);
       display_obj.touchToExit();
@@ -1212,8 +1226,9 @@ void WiFiScan::RunRawScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("deauth");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1228,7 +1243,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[39],120,16,2);
       display_obj.touchToExit();
@@ -1253,8 +1268,9 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
+#ifdef HAS_SD
   sd_obj.openCapture("probe");
-
+#endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
@@ -1269,7 +1285,7 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       display_obj.tft.fillRect(0,16,240,16, color);
       display_obj.tft.drawCentreString(text_table4[40],120,16,2);
       display_obj.touchToExit();
@@ -1311,7 +1327,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
         display_obj.initScrollValues(true);
         display_obj.tft.setTextWrap(false);
         display_obj.tft.setTextColor(TFT_BLACK, color);
-        #ifndef MARAUDER_MINI
+        #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
           display_obj.tft.fillRect(0,16,240,16, color);
           display_obj.tft.drawCentreString(text_table4[41],120,16,2);
           display_obj.touchToExit();
@@ -1366,8 +1382,11 @@ void WiFiScan::getMAC(char *addr, uint8_t* data, uint16_t offset) {
 
 void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#else
+  bool save_packet = false;
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1436,16 +1455,18 @@ void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t t
 
   
   Serial.println();
-
+#ifdef HAS_SD
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#endif
 }
 
 void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1543,16 +1564,20 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         
         Serial.println();
 
+        #ifdef HAS_SD
         if (save_packet)
           sd_obj.addPacket(snifferPacket->payload, len);
+        //}
+        #endif
       }
     }
   }
 }
 
 void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type) {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1702,8 +1727,11 @@ void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type
 
         Serial.println();
 
+#ifdef HAS_SD
         if (save_packet)
-          sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
       }
     }
   }
@@ -1711,8 +1739,9 @@ void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type
 
 void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1828,8 +1857,11 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
         Serial.println();
 
+#ifdef HAS_SD
         if (save_packet)
-          sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
       }
     }
   }
@@ -1837,8 +1869,9 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
 void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1901,15 +1934,19 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       
       Serial.println();
 
+#ifdef HAS_SD
       if (save_packet)
-        sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
     }
   }
 }
 
 void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2064,14 +2101,18 @@ void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t typ
 
   access_points->set(ap_index, ap);
 
+#ifdef HAS_SD
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
 }
 
 void WiFiScan::rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2123,14 +2164,18 @@ void WiFiScan::rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   
   Serial.println();
 
+#ifdef HAS_SD
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
 }
 
 void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2190,15 +2235,19 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       
       Serial.println();
 
+#ifdef HAS_SD
       if (save_packet)
-        sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
     }
   }
 }
 
 void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2259,17 +2308,21 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         }
       #endif
       
-      Serial.println();    
+      Serial.println();
 
+#ifdef HAS_SD
       if (save_packet)
-        sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
     }
   }
 }
 
 void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2349,10 +2402,13 @@ void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t 
         }
       #endif
       
-      Serial.println();    
+      Serial.println();
 
+#ifdef HAS_SD
       if (save_packet)
-        sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
     }
   }
 }
@@ -2763,8 +2819,9 @@ void WiFiScan::sendDeauthAttack(uint32_t currentTime, String dst_mac_str) {
 
 void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2786,7 +2843,7 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     const WifiMgmtHdr *hdr = &ipkt->hdr;
 
     // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
-    #ifndef MARAUDER_MINI
+    #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
       if (snifferPacket->payload[0] == 0x80)
       {
         num_beacon++;
@@ -2815,7 +2872,7 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     
       //Serial.print(" ");
     
-      #ifdef MARAUDER_MINI
+      #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
         if (display_obj.display_buffer->size() == 0)
         {
           display_obj.loading = true;
@@ -2825,16 +2882,22 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       #endif
     #endif
 
+#ifdef HAS_SD
     if (save_packet)
-      sd_obj.addPacket(snifferPacket->payload, len);
+    sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
   }
 }
 
 void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
   bool send_deauth = settings_obj.loadSetting<bool>(text_table4[5]);
-  
+#else
+  bool send_deauth = false;
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2911,7 +2974,7 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
       Serial.print(" ");
 
-      #ifdef MARAUDER_MINI
+      #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
         if (display_obj.display_buffer->size() == 0)
         {
           display_obj.loading = true;
@@ -2935,15 +2998,19 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 //    Serial.print("\n");
   }
 
+#ifdef HAS_SD
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
 }
 
 void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+#ifdef HAS_SD
   bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
   bool send_deauth = settings_obj.loadSetting<bool>(text_table4[5]);
-  
+#endif
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -3013,8 +3080,11 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
 //    Serial.print("\n");
   }
 
+#ifdef HAS_SD
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
+  //}
+#endif
 }
 
 #ifdef HAS_SCREEN
@@ -3033,12 +3103,13 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
       y_pos_y = 0;
       y_pos_z = 0;
       boolean pressed = false;
-  
+
       uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
   
       // Do the touch stuff
-      pressed = display_obj.tft.getTouch(&t_x, &t_y);
-  
+      #ifdef HAS_TOUCH
+        pressed = display_obj.tft.getTouch(&t_x, &t_y);
+      #endif
       if (pressed) {
         Serial.print("Got touch | X: ");
         Serial.print(t_x);
@@ -3177,9 +3248,9 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
   
         //delay(50);
       }
-  
+  #ifdef HAS_SD
       sd_obj.main();
-  
+  #endif
     }
   
     display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); //erase XY buttons and any lines behind them
@@ -3209,6 +3280,7 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
       uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
   
       // Do the touch stuff
+#ifndef MARAUDER_C1B3RT4CKS
       pressed = display_obj.tft.getTouch(&t_x, &t_y);
   
       if (pressed) {
@@ -3217,7 +3289,7 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
         Serial.print(" Y: ");
         Serial.println(t_y);
       }
-  
+#endif
   
       // Check buttons for presses
       for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++)
@@ -3402,9 +3474,9 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
     
         //delay(50);
       }
-  
+  #ifdef HAS_SD
       sd_obj.main();
-     
+  #endif
     }
     
     display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK); //erase XY buttons and any lines behind them
@@ -3478,7 +3550,7 @@ void WiFiScan::main(uint32_t currentTime)
   else if (currentScanMode == WIFI_PACKET_MONITOR)
   {
     #ifdef HAS_SCREEN
-      #ifndef MARAUDER_MINI
+      #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
         packetMonitorMain(currentTime);
       #endif
     #endif
@@ -3486,7 +3558,7 @@ void WiFiScan::main(uint32_t currentTime)
   else if (currentScanMode == WIFI_SCAN_EAPOL)
   {
     #ifdef HAS_SCREEN
-      #ifndef MARAUDER_MINI
+      #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
         eapolMonitorMain(currentTime);
       #endif
     #endif
