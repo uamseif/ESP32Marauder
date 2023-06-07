@@ -392,7 +392,7 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
   #ifdef MARAUDER_FLIPPER
     flipper_led.attackLED();
   #else
-    led_obj.setMode(MODE_ATTACK);
+    led_obj.setMode(MODE_RAINBOW);
   #endif
   initTime = millis();
 }
@@ -562,7 +562,7 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
   #else
-    led_obj.setMode(MODE_SNIFF);
+    led_obj.setMode(MODE_RAINBOW);
   #endif
 
   Serial.println(text_table4[9] + (String)access_points->size());

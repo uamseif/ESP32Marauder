@@ -34,7 +34,17 @@
     #define U_BTN 19
     #define R_BTN 32
     #define D_BTN 27
-  #endif
+
+    #define LED_1_PIN 22
+    #define LED_2_PIN 21
+    #define LED_3_PIN 17
+    #define LED_4_PIN 16
+    #define LED_5_PIN 14
+    #define LED_6_PIN 12
+    #define LED_7_PIN 13
+    #define LED_8_PIN 15
+
+#endif
 
   //// END BUTTON DEFINITIONS
 
@@ -275,7 +285,7 @@
     #define WIDTH_1 160
 
     #define STANDARD_FONT_CHAR_LIMIT (TFT_WIDTH/6) // number of characters on a single line with normal font
-    #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
+    #define TEXT_HEIGHT 12 // Height of text to be printed and scrolled
     #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
     #define TOP_FIXED_AREA 48 // Number of lines in top fixed area (lines counted from top of screen)
     #define YMAX 320 // Bottom of screen area

@@ -209,7 +209,16 @@ void setup()
   #ifdef HAS_SD
     settings_obj.begin();
   #endif
+  if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
+    Serial.println("Settings SPIFFS Mount Failed");
+  }
 
+  int tBytes = SPIFFS.totalBytes();
+  int uBytes = SPIFFS.usedBytes();
+  Serial.print("Total bytes: ");
+  Serial.print(tBytes);
+  Serial.print(", used bytes: ");
+  Serial.println(uBytes);
   #ifdef MARAUDER_FLIPPER
     flipper_led.RunSetup();
   #endif
