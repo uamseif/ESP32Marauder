@@ -24,6 +24,8 @@ extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
 #ifdef HAS_SD
   extern SDInterface sd_obj;
+#else
+  extern SPIFFSInterface spiffs_obj;
 #endif
 extern Settings settings_obj;
 extern LinkedList<AccessPoint>* access_points;

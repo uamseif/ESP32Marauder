@@ -556,6 +556,8 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("ap");
+#else
+  spiffs_obj.openCapture("ap");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -792,6 +794,13 @@ void WiFiScan::RunInfo()
       display_obj.tft.println(text_table4[31]);
     #endif
   }
+#else
+#ifdef HAS_SCREEN
+  display_obj.tft.println(text_table4[28]);
+  display_obj.tft.print(text_table4[29]);
+  display_obj.tft.print(spiffs_obj.spiffs_sz);
+  display_obj.tft.println("MB");
+#endif
 #endif
   battery_obj.battery_level = battery_obj.getBatteryLevel();
   if (battery_obj.i2c_supported) {
@@ -814,6 +823,8 @@ void WiFiScan::RunInfo()
 void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
 #ifdef HAS_SD
   sd_obj.openCapture("espressif");
+#else
+  spiffs_obj.openCapture("espressif");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -859,6 +870,8 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   #endif
 #ifdef HAS_SD
   sd_obj.openCapture("packet_monitor");
+#else
+  spiffs_obj.openCapture("packet_monitor");
 #endif
   #if !defined MARAUDER_MINI && !defined MARAUDER_C1B3RT4CKS
     
@@ -944,6 +957,8 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
     #endif
 #ifdef HAS_SD
     sd_obj.openCapture("eapol");
+#else
+  spiffs_obj.openCapture("eapol");
 #endif
     #ifdef HAS_SCREEN
       #ifdef TFT_SHIELD
@@ -971,6 +986,8 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   #else
   #ifdef HAS_SD
     sd_obj.openCapture("eapol");
+  #else
+    spiffs_obj.openCapture("eapol");
   #endif
     #ifdef HAS_SCREEN
       display_obj.TOP_FIXED_AREA_2 = 48;
@@ -1065,6 +1082,8 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("pwnagotchi");
+#else
+  spiffs_obj.openCapture("pwnagotchi");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1106,6 +1125,8 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("beacon");
+#else
+  spiffs_obj.openCapture("beacon");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1146,6 +1167,8 @@ void WiFiScan::RunStationScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("station");
+#else
+  spiffs_obj.openCapture("station");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1186,6 +1209,8 @@ void WiFiScan::RunRawScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("raw");
+#else
+  spiffs_obj.openCapture("raw");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1226,6 +1251,8 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("deauth");
+#else
+  spiffs_obj.openCapture("deauth");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1268,6 +1295,8 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
 #ifdef HAS_SD
   sd_obj.openCapture("probe");
+#else
+  spiffs_obj.openCapture("probe");
 #endif
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
@@ -1454,6 +1483,8 @@ void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t t
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+  spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
 }
 
@@ -1561,6 +1592,8 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         if (save_packet)
           sd_obj.addPacket(snifferPacket->payload, len);
         //}
+        #else
+          spiffs_obj.addPacket(snifferPacket->payload, len);
         #endif
       }
     }
@@ -1722,6 +1755,8 @@ void WiFiScan::apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type
         if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+        spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
       }
     }
@@ -1850,6 +1885,8 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+        spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
       }
     }
@@ -1925,6 +1962,8 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+      spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
     }
   }
@@ -2090,6 +2129,8 @@ void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t typ
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+  spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
 }
 
@@ -2151,6 +2192,8 @@ void WiFiScan::rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+  spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
 }
 
@@ -2220,6 +2263,8 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+      spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
     }
   }
@@ -2293,6 +2338,8 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+      spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
     }
   }
@@ -2385,6 +2432,8 @@ void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t 
       if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+      spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
     }
   }
@@ -2861,6 +2910,8 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+    spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
   }
 }
@@ -2974,6 +3025,8 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+  spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
 }
 
@@ -3054,6 +3107,8 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
   if (save_packet)
     sd_obj.addPacket(snifferPacket->payload, len);
   //}
+#else
+  spiffs_obj.addPacket(snifferPacket->payload, len);
 #endif
 }
 
@@ -3220,6 +3275,8 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
       }
   #ifdef HAS_SD
       sd_obj.main();
+  #else
+      spiffs_obj.main();
   #endif
     }
   
@@ -3446,6 +3503,8 @@ void WiFiScan::activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t
       }
   #ifdef HAS_SD
       sd_obj.main();
+  #else
+      spiffs_obj.main();
   #endif
     }
     

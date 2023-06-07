@@ -1544,7 +1544,7 @@ void MenuFunctions::RunSetup()
   wifiMenu.name = text_table1[7];
   badusbMenu.name = text_table1[8];
   deviceMenu.name = text_table1[9];
-  shareMenu.name = text_table1[10];
+  shareMenu.name = text_table1[39];
   failedUpdateMenu.name = text_table1[11];
   whichUpdateMenu.name = text_table1[12];
   confirmMenu.name = text_table1[13];
@@ -1578,8 +1578,11 @@ void MenuFunctions::RunSetup()
   if (a32u4_obj.supported) addNodes(&mainMenu, text_table1[8], TFT_RED, NULL, BAD_USB_ICO, [this]() {
     changeMenu(&badusbMenu);
   });
-  addNodes(&mainMenu, text_table1[10], TFT_MAGENTA, NULL, GENERAL_APPS, [this]() {
+  addNodes(&mainMenu, text_table1[63], TFT_MAGENTA, NULL, GENERAL_APPS, [this]() {
     changeMenu(&shareMenu);
+    wifi_scan_obj.currentScanMode = OTA_UPDATE;
+      //changeMenu(shareMenu.parentMenu);
+    wifi_share_obj.setupWifiShare();
   });
   addNodes(&mainMenu, text_table1[9], TFT_BLUE, NULL, DEVICE, [this]() {
     changeMenu(&deviceMenu);
@@ -1911,13 +1914,10 @@ void MenuFunctions::RunSetup()
   // General apps menu
   shareMenu.parentMenu = &mainMenu;
   addNodes(&shareMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
-    display_obj.draw_tft = false;
+    wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     changeMenu(shareMenu.parentMenu);
-  });
-  addNodes(&shareMenu, text_table1[38], TFT_WHITE, NULL, DRAW, [this]() {
-    display_obj.clearScreen();
-    display_obj.setupDraw();
-    display_obj.draw_tft = true;
+    WiFi.softAPdisconnect(true);
+    wifi_share_obj.shutdownServer();
   });
 
   // Device menu

@@ -26,6 +26,8 @@
 #endif
 #ifdef HAS_SD
 #include "SDInterface.h"
+#else
+#include "SPIFFSInterface.h"
 #endif
 #include "Buffer.h"
 #include "BatteryInterface.h"
@@ -79,6 +81,8 @@
 #endif
 #ifdef HAS_SD
 extern SDInterface sd_obj;
+#else
+extern SPIFFSInterface spiffs_obj;
 #endif
 extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;

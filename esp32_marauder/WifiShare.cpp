@@ -96,63 +96,45 @@ void WifiShare::setupWifiShare()
   Serial.println("Setting server behavior...");
   Serial.println(wifi_scan_obj.freeRAM());
   server.on("/jquery.min.js", HTTP_GET, onJavaScript);
+
+  server_index += server_start;
+
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+
+  while(file){
+    server_index += "<li><a href=\"/download?file=" + String(file.name()) + "\">" + String(file.name()) + "</a></li>";
+    file = root.openNextFile();
+  }
+  server_index += server_end;
+
   /*return index page which is stored in serverIndex */
   server.on("/", HTTP_GET, [this]() {
       server.sendHeader("Connection", "close");
-      server.send(200, "text/html", loginIndex);
-  });
-  server.on("/serverIndex", HTTP_GET, [this]() {
-      server.sendHeader("Connection", "close");
-      server.send(200, "text/html", serverIndex);
-  });
-  /*handling uploading firmware file */
-  server.on("/update", HTTP_POST, [this]() {
-      server.sendHeader("Connection", "close");
-      server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-      ESP.restart();
-  }, [this]() {
-      HTTPUpload& upload = server.upload();
-      if (upload.status == UPLOAD_FILE_START) {
-#ifdef HAS_SCREEN
-        display_obj.tft.setTextColor(TFT_YELLOW);
-        display_obj.tft.print(text_table3[2]);
-        display_obj.tft.print(upload.filename.c_str());
-        display_obj.tft.print("\n");
-#endif
-        Serial.printf("Update: %s\n", upload.filename.c_str());
-        if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-          Update.printError(Serial);
-        }
-      } else if (upload.status == UPLOAD_FILE_WRITE) {
-        /* flashing firmware to ESP*/
-        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-          Update.printError(Serial);
-        }
-#ifdef HAS_SCREEN
-        display_obj.tft.setTextColor(TFT_CYAN);
-        display_obj.tft.fillRect(0, 164, 240, 8, TFT_BLACK);
-        display_obj.tft.setCursor(0, 164);
-        display_obj.tft.print(text_table3[3]);
-        display_obj.tft.print(upload.totalSize);
-        display_obj.tft.print("\n");
-#endif
+      server.send(200, "text/html", server_index);
 
-      } else if (upload.status == UPLOAD_FILE_END) {
-        if (Update.end(true)) { //true to set the size to the current progress
-#ifdef HAS_SCREEN
-          display_obj.tft.setTextColor(TFT_GREEN);
-          display_obj.tft.print(text_table3[4]);
-          display_obj.tft.print(upload.totalSize);
-          display_obj.tft.print(text_table2[3]);
-#endif
-          Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-          delay(1000);
-        } else {
-          Update.printError(Serial);
+  });
+
+  server.on("/download", HTTP_GET, [this]() {
+      if (server.args() > 0 && server.hasArg("file")) {
+        String file = server.arg("file");
+        server.sendHeader("Connection", "close");
+        //server.send(SPIFFS, "/raw_0.pcap", "text/plain", true);
+        File download = SPIFFS.open("/" + file,  "r");
+        if (download) {
+          server.sendHeader("Content-Type", "text/text");
+          server.sendHeader("Content-Disposition", "attachment; filename=" + file);
+          server.sendHeader("Connection", "close");
+          server.streamFile(download, "application/octet-stream");
+          download.close();
         }
+      } else {
+        server.sendHeader("Connection", "close");
+        server.send(200, "text/html", "");
+        server.sendContent(server_index);
       }
-  });
 
+  });
 
   Serial.println("Finished setting server behavior");
   Serial.println(wifi_scan_obj.freeRAM());

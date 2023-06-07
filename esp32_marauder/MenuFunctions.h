@@ -18,6 +18,10 @@
 #include "a32u4_interface.h"
 #include "settings.h"
 
+#ifdef MARAUDER_C1B3RT4CKS
+#include "WifiShare.h"
+#endif
+
 #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
   #include <SwitchLib.h>
   extern SwitchLib u_btn;
@@ -30,6 +34,9 @@
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
+#ifdef MARAUDER_C1B3RT4CKS
+extern WifiShare wifi_share_obj;
+#endif
 #ifdef HAS_SD
 extern SDInterface sd_obj;
 #endif

@@ -46,6 +46,7 @@ https://www.online-utility.org/image/convert/to/XBM
 
 #ifdef MARAUDER_C1B3RT4CKS
 #include "WifiShare.h"
+#include "SPIFFSInterface.h"
 #endif
 
 #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
@@ -60,6 +61,8 @@ https://www.online-utility.org/image/convert/to/XBM
 WiFiScan wifi_scan_obj;
 #ifdef HAS_SD
   SDInterface sd_obj;
+#else
+  SPIFFSInterface spiffs_obj;
 #endif
 Web web_obj;
 WifiShare wifi_share_obj;
@@ -224,6 +227,19 @@ void setup()
   Serial.print(tBytes);
   Serial.print(", used bytes: ");
   Serial.println(uBytes);
+
+  File root = SPIFFS.open("/");
+
+  File file = root.openNextFile();
+
+  while(file){
+
+    Serial.print("FILE: ");
+    Serial.println(file.name());
+
+    file = root.openNextFile();
+  }
+
   #ifdef MARAUDER_FLIPPER
     flipper_led.RunSetup();
   #endif
@@ -257,6 +273,21 @@ void setup()
         display_obj.tft.println(F(text_table0[4]));
         display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
       #endif
+    }
+  #else
+  if(spiffs_obj.initSPIFFS()) {
+      //Serial.println(F("SD Card supported"));
+  #ifdef HAS_SCREEN
+      display_obj.tft.println(F(text_table0[3]));
+  #endif
+    }
+    else {
+      Serial.println(F("SPIFFS could not be initialized"));
+  #ifdef HAS_SCREEN
+      display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+      display_obj.tft.println(F(text_table0[4]));
+      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  #endif
     }
   #endif
 
@@ -344,6 +375,8 @@ void loop()
     wifi_scan_obj.main(currentTime);
     #ifdef HAS_SD
       sd_obj.main();
+    #else
+      spiffs_obj.main();
     #endif
     #ifndef MARAUDER_FLIPPER
       battery_obj.main(currentTime);
