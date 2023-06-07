@@ -83,9 +83,7 @@ extern SDInterface sd_obj;
 extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
-#ifdef HAS_SD
 extern Settings settings_obj;
-#endif
 extern flipperLED flipper_led;
 extern LedInterface led_obj;
 

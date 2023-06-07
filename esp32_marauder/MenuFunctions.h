@@ -36,9 +36,7 @@ extern SDInterface sd_obj;
 extern BatteryInterface battery_obj;
 extern EspInterface esp_obj;
 extern A32u4Interface a32u4_obj;
-#ifdef HAS_SD
 extern Settings settings_obj;
-#endif
 #define FLASH_BUTTON 0
 
 #if BATTERY_ANALOG_ON == 1
@@ -145,7 +143,7 @@ class MenuFunctions
     Menu wifiMenu;
     Menu bluetoothMenu;
     Menu badusbMenu;
-    Menu generalMenu;
+    Menu shareMenu;
     Menu deviceMenu;
 
     // Device menu stuff

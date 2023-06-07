@@ -211,7 +211,7 @@ void CommandLine::runCommand(String input) {
     int re_sw = this->argSearch(&cmd_args, "-r"); // Reset setting
     int en_sw = this->argSearch(&cmd_args, "enable"); // enable setting
     int da_sw = this->argSearch(&cmd_args, "disable"); // disable setting
-    #ifdef HAS_SD
+    //#ifdef HAS_SD
       if (re_sw != -1) {
         settings_obj.createDefaultSettings(SPIFFS);
         return;
@@ -239,19 +239,13 @@ void CommandLine::runCommand(String input) {
       }
 
     }
-    #endif
+    //#endif
   }
-#ifdef HAS_SD
   else if (cmd_args.get(0) == REBOOT_CMD) {
     Serial.println("Rebooting...");
     ESP.restart();
   }
-    #else
-if (cmd_args.get(0) == REBOOT_CMD) {
-Serial.println("Rebooting...");
-ESP.restart();
-}
-#endif
+
 
   //// WiFi/Bluetooth Scan/Attack commands
   if (!wifi_scan_obj.scanning()) {

@@ -44,6 +44,10 @@ https://www.online-utility.org/image/convert/to/XBM
   #include "a32u4_interface.h"
 #endif
 
+#ifdef MARAUDER_C1B3RT4CKS
+#include "WifiShare.h"
+#endif
+
 #if defined MARAUDER_MINI || defined MARAUDER_C1B3RT4CKS
   #include <SwitchLib.h>
   SwitchLib u_btn = SwitchLib(U_BTN, 1000, true);
@@ -58,14 +62,15 @@ WiFiScan wifi_scan_obj;
   SDInterface sd_obj;
 #endif
 Web web_obj;
+WifiShare wifi_share_obj;
 Buffer buffer_obj;
 BatteryInterface battery_obj;
 TemperatureInterface temp_obj;
 LedInterface led_obj;
 EspInterface esp_obj;
-#ifdef HAS_SD
-  Settings settings_obj;
-#endif
+
+Settings settings_obj;
+
 CommandLine cli_obj;
 flipperLED flipper_led;
 
@@ -206,9 +211,9 @@ void setup()
   #endif
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
-  #ifdef HAS_SD
+
     settings_obj.begin();
-  #endif
+
   if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
     Serial.println("Settings SPIFFS Mount Failed");
   }
@@ -344,9 +349,8 @@ void loop()
       battery_obj.main(currentTime);
       temp_obj.main(currentTime);
     #endif
-    #ifdef HAS_SD
       settings_obj.main(currentTime);
-    #endif
+
     if (((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) && (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) ||
         (mini)) {
       #ifdef HAS_SCREEN

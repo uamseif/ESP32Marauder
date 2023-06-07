@@ -10,9 +10,7 @@
 #define G_PIN 5
 #define R_PIN 6
 
-#ifdef HAS_SD
 extern Settings settings_obj;
-#endif
 class flipperLED {
 
   public:

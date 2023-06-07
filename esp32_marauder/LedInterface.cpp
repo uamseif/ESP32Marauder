@@ -32,9 +32,7 @@ void LedInterface::RunSetup() {
 void LedInterface::main(uint32_t currentTime) {
 
     if (
-#ifdef HAS_SD
   (!settings_obj.loadSetting<bool>("EnableLED")) ||
-#endif
         this->current_mode == MODE_OFF) {
       this->ledOff();
       return;
@@ -104,6 +102,14 @@ void LedInterface::ledOff() {
 
 void LedInterface::rainbow() {
   pinMode(LED_1_PIN, OUTPUT);
+  pinMode(LED_2_PIN, OUTPUT);
+  pinMode(LED_3_PIN, OUTPUT);
+  pinMode(LED_4_PIN, OUTPUT);
+  pinMode(LED_5_PIN, OUTPUT);
+  pinMode(LED_6_PIN, OUTPUT);
+  pinMode(LED_7_PIN, OUTPUT);
+  pinMode(LED_8_PIN, OUTPUT);
+
 #ifndef MARAUDER_C1B3RT4CKS
 
     strip.setPixelColor(0, this->Wheel((0 * 256 / 100 + this->wheel_pos) % 256));

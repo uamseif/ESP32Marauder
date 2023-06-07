@@ -174,9 +174,8 @@ MenuFunctions::MenuFunctions()
   }
   
   void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
-    #ifdef HAS_SD
       extern Settings settings_obj;
-    #endif
+
     extern MenuFunctions menu_function_obj;
   
     String btn_text = lv_list_get_btn_text(btn);
@@ -212,30 +211,24 @@ MenuFunctions::MenuFunctions()
   
         label = lv_label_create(exit_btn, NULL);
 
-        #ifdef HAS_SD
           // Create the type specific device
           if (settings_obj.getSettingType(btn_text) == "bool") {
             lv_obj_t * sw = lv_switch_create(obj, NULL);
             lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
           }
-        #endif
       }
     }
   }
   
   void MenuFunctions::displaySettingsGFX(){
-    #ifdef HAS_SD
       extern Settings settings_obj;
-    #endif
-  
+
     DynamicJsonDocument json(1024); // ArduinoJson v6
 
-    #ifdef HAS_SD
       if (deserializeJson(json, settings_obj.getSettingsString())) {
         Serial.println("\nCould not parse json");
       }
-    #endif
-    
+
     lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
     lv_obj_set_size(list1, 160, 200);
     lv_obj_set_width(list1, LV_HOR_RES);
@@ -1457,7 +1450,6 @@ void MenuFunctions::runBoolSetting(String key) {
 }
 
 String MenuFunctions::callSetting(String key) {
-  #ifdef HAS_SD
     specSettingMenu.name = key;
 
     String setting_type = settings_obj.getSettingType(key);
@@ -1465,18 +1457,13 @@ String MenuFunctions::callSetting(String key) {
     if (setting_type == "bool") {
       return "bool";
     }
-  #else
-    return "bool";
-  #endif
+
 }
 
 void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
   specSettingMenu.name = key;
-#ifdef HAS_SD
   bool setting_value = settings_obj.loadSetting<bool>(key);
-#else
-  bool setting_value = false;
-#endif
+
   // Make a local copy of menu node
   MenuNode node = menu->list->get(index);
 
@@ -1521,7 +1508,7 @@ void MenuFunctions::RunSetup()
   wifiMenu.list = new LinkedList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new LinkedList<MenuNode>(); // Get list in third menu ready
   badusbMenu.list = new LinkedList<MenuNode>();
-  generalMenu.list = new LinkedList<MenuNode>();
+  shareMenu.list = new LinkedList<MenuNode>();
   deviceMenu.list = new LinkedList<MenuNode>();
 
   // Device menu stuff
@@ -1557,7 +1544,7 @@ void MenuFunctions::RunSetup()
   wifiMenu.name = text_table1[7];
   badusbMenu.name = text_table1[8];
   deviceMenu.name = text_table1[9];
-  generalMenu.name = text_table1[10];
+  shareMenu.name = text_table1[10];
   failedUpdateMenu.name = text_table1[11];
   whichUpdateMenu.name = text_table1[12];
   confirmMenu.name = text_table1[13];
@@ -1592,7 +1579,7 @@ void MenuFunctions::RunSetup()
     changeMenu(&badusbMenu);
   });
   addNodes(&mainMenu, text_table1[10], TFT_MAGENTA, NULL, GENERAL_APPS, [this]() {
-    changeMenu(&generalMenu);
+    changeMenu(&shareMenu);
   });
   addNodes(&mainMenu, text_table1[9], TFT_BLUE, NULL, DEVICE, [this]() {
     changeMenu(&deviceMenu);
@@ -1922,12 +1909,12 @@ void MenuFunctions::RunSetup()
   #endif
 
   // General apps menu
-  generalMenu.parentMenu = &mainMenu;
-  addNodes(&generalMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+  shareMenu.parentMenu = &mainMenu;
+  addNodes(&shareMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
     display_obj.draw_tft = false;
-    changeMenu(generalMenu.parentMenu);
+    changeMenu(shareMenu.parentMenu);
   });
-  addNodes(&generalMenu, text_table1[38], TFT_WHITE, NULL, DRAW, [this]() {
+  addNodes(&shareMenu, text_table1[38], TFT_WHITE, NULL, DRAW, [this]() {
     display_obj.clearScreen();
     display_obj.setupDraw();
     display_obj.draw_tft = true;
@@ -1970,17 +1957,15 @@ void MenuFunctions::RunSetup()
   addNodes(&settingsMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(settingsMenu.parentMenu);
   });
-  #ifdef HAS_SD
   for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
     if (this->callSetting(settings_obj.setting_index_to_name(i)) == "bool")
       addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFT_LIGHTGREY, NULL, 0, [this, i]() {
       settings_obj.toggleSetting(settings_obj.setting_index_to_name(i));
-      changeMenu(&specSettingMenu);
+      //changeMenu(&settingsMenu);
       //this->callSetting(settings_obj.setting_index_to_name(i));
       //this->displaySetting(settings_obj.setting_index_to_name(i), &settingsMenu, i + 1);
     }, settings_obj.loadSetting<bool>(settings_obj.setting_index_to_name(i)));
   }
-  #endif
 
   // Specific setting menu
   specSettingMenu.parentMenu = &settingsMenu;

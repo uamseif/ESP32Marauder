@@ -14,10 +14,7 @@
 #define MODE_RAINBOW 1
 #define MODE_ATTACK 2
 #define MODE_SNIFF 3
-
-#ifdef HAS_SD
   extern Settings settings_obj;
-#endif
 #ifndef MARAUDER_C1B3RT4CKS
 
 extern Adafruit_NeoPixel strip;

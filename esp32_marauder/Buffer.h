@@ -10,9 +10,9 @@
 #define SNAP_LEN 2324 // max len of each recieved packet
 
 //extern bool useSD;
-#ifdef HAS_SD
+
   extern Settings settings_obj;
-#endif
+
 
 class Buffer {
   public:
