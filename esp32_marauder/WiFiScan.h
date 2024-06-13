@@ -3,15 +3,17 @@
 
 #include "configs.h"
 
-//#include <BLEDevice.h>
-//#include <BLEUtils.h>
-//#include <BLEScan.h>
-//#include <BLEAdvertisedDevice.h>
+#ifdef HAS_BT
+  #include <BLEDevice.h>
+  #include <BLEUtils.h>
+  #include <BLEScan.h>
+  #include <BLEAdvertisedDevice.h>
+#endif
 #include <ArduinoJson.h>
 
 // Testing NimBLE
 #ifdef HAS_BT
-  #include <NimBLEDevice.h>
+  //#include <NimBLEDevice.h>
 #endif
 
 #include <WiFi.h>
@@ -150,7 +152,7 @@ class WiFiScan
     int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
     #ifdef HAS_BT
-      NimBLEScan* pBLEScan;
+      BLEScan* pBLEScan;
     #endif
 
     //String connected_network = "";
@@ -241,6 +243,8 @@ class WiFiScan
                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                               0xf0, 0xff, 0x02, 0x00
                           };
+
+
 
     void startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_string);
 
@@ -353,5 +357,7 @@ class WiFiScan
     static void activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    void SpamIOSDevices();
+
 };
 #endif

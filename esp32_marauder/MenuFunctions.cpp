@@ -1852,9 +1852,18 @@ void MenuFunctions::RunSetup()
   //addNodes(&bluetoothMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
   //  changeMenu(&bluetoothScannerMenu);
   //});
+
+  addNodes(&bluetoothMenu, text_table1[65], TFT_PURPLE, NULL, SNIFFERS, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.SpamIOSDevices();
+  });
+
+  
   addNodes(&bluetoothMenu, text_table1[33], TFT_PURPLE, NULL, GENERAL_APPS, [this]() {
     changeMenu(&bluetoothGeneralMenu);
   });
+
 
   // Build bluetooth sniffer Menu
   bluetoothSnifferMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
