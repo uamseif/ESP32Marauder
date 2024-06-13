@@ -30,7 +30,7 @@
   #endif
 
   #ifdef MARAUDER_C1B3RT4CKS
-    #if MARAUDER_C1B3RT4CKS_V2
+    #ifdef MARAUDER_C1B3RT4CKS_V2
       #define L_BTN 34
       #define C_BTN 26
       #define U_BTN 35
