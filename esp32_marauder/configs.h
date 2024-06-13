@@ -13,6 +13,7 @@
   //#define ESP32_LDDB
   //#define MARAUDER_DEV_BOARD_PRO
   #define MARAUDER_C1B3RT4CKS
+  //#define MARAUDER_C1B3RT4CKS_V2
 
   #define MARAUDER_VERSION "v0.10.1"
 
@@ -29,22 +30,39 @@
   #endif
 
   #ifdef MARAUDER_C1B3RT4CKS
-    #define L_BTN 35
-    #define C_BTN 25
-    #define U_BTN 19
-    #define R_BTN 32
-    #define D_BTN 27
+    #if MARAUDER_C1B3RT4CKS_V2
+      #define L_BTN 34
+      #define C_BTN 26
+      #define U_BTN 35
+      #define R_BTN 27
+      #define D_BTN 32
 
-    #define LED_1_PIN 22
-    #define LED_2_PIN 21
-    #define LED_3_PIN 17
-    #define LED_4_PIN 16
-    #define LED_5_PIN 14
-    #define LED_6_PIN 12
-    #define LED_7_PIN 13
-    #define LED_8_PIN 15
+      #define LED_1_PIN 22
+      #define LED_2_PIN 21
+      #define LED_3_PIN 17
+      #define LED_4_PIN 16
+      #define LED_5_PIN 15
+      #define LED_6_PIN 13
+      #define LED_7_PIN 12
+      #define LED_8_PIN 14
+    #else
 
-#endif
+      #define L_BTN 35
+      #define C_BTN 25
+      #define U_BTN 19
+      #define R_BTN 32
+      #define D_BTN 27
+
+      #define LED_1_PIN 22
+      #define LED_2_PIN 21
+      #define LED_3_PIN 17
+      #define LED_4_PIN 16
+      #define LED_5_PIN 14
+      #define LED_6_PIN 12
+      #define LED_7_PIN 13
+      #define LED_8_PIN 15
+    #endif
+  #endif
 
   //// END BUTTON DEFINITIONS
 

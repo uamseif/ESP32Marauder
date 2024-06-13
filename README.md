@@ -25,6 +25,9 @@
 ## Getting Started
 Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the firmware.  
 
+## Battlebadge V2
+In this board the pin mapping has changed. In order to use the new board uncomment the line `#define MARAUDER_C1B3RT4CKS_V2` in the `config.h` file. 
+
 Check out the project [wiki](https://github.com/justcallmekoko/ESP32Marauder/wiki) for a full overview of the ESP32 Marauder
 ## Uploading the firmware
 You can build yourself the code with the Arduino IDE or use a prebuilt release. To upload the prebuilt binaries you have 2 options:
